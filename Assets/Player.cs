@@ -9,8 +9,11 @@ public class Player : MonoBehaviour
     public float jumpHeight = 3.5f;
     private bool _facingRight = true;
     public Rigidbody2D rb;
-    private bool _isGrounded;
+    //private bool _isGrounded;
     private bool _jumpRequested;
+    public LayerMask groundLayer;
+    public float checkGroundDistance = 0.35f;
+    
 
     void Start()
     {
@@ -31,7 +34,7 @@ public class Player : MonoBehaviour
             _facingRight = !_facingRight;
         }
 
-        if (Input.GetKey(KeyCode.Space) && _isGrounded)
+        if (Input.GetKey(KeyCode.Space) && IsGrounded())
         {
             _jumpRequested = true;
         }
@@ -72,21 +75,14 @@ public class Player : MonoBehaviour
         rb.AddForce(new Vector2(0f, jumpHeight), ForceMode2D.Impulse);
     }
 
-    private void OnCollisionEnter2D(Collision2D collision)
+    bool IsGrounded()
     {
-        Debug.Log($"Collision with {collision.gameObject.name}");
-        
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            _isGrounded = true;
-        }
+        var hit = Physics2D.Raycast(transform.position, Vector2.down, checkGroundDistance, groundLayer);
+        return hit.collider != null;
     }
-
-    private void OnCollisionExit2D(Collision2D collision)
+    
+    private void OnDrawGizmosSelected()
     {
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            _isGrounded = false;
-        }
+        Debug.DrawRay(transform.position, Vector2.down * checkGroundDistance, Color.yellow); 
     }
 }
