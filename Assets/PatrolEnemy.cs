@@ -18,6 +18,10 @@ public class PatrolEnemy : MonoBehaviour
     public float attackCooldown = 1f;
     private float lastAttackTime;
 
+    public Transform attackPoint;
+    public float attackRadius = 1f;
+    public LayerMask attackLayer;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -42,28 +46,28 @@ public class PatrolEnemy : MonoBehaviour
                 inAttackRange = false;
                 isPatrolling = false;
                 isChasing = true;
-                Debug.Log("Chasing!");
+                //Debug.Log("Chasing!");
             }
             else
             {
                 inAttackRange = false;
                 isPatrolling = true;
                 isChasing = false;
-                Debug.Log("Wall, can't chase.");
+                //Debug.Log("Wall, can't chase.");
             }
         }
 
         if (inAttackRange && Time.time - lastAttackTime >= attackCooldown)
         {
             moveSpeed = 0;
-            Debug.Log("Attack!");
+            //Debug.Log("Attack!");
             animator.SetTrigger("Attack_2");
             lastAttackTime = Time.time;
         }
         else if (isChasing)
         {
             moveSpeed = 1.5f;
-            Debug.Log("Chasing!");
+            //Debug.Log("Chasing!");
             transform.position = Vector2.MoveTowards(transform.position, player.position, moveSpeed * Time.deltaTime);
             var direction = (player.position - transform.position).normalized;
             if (direction.x > 0 && facingLeft)
@@ -74,7 +78,7 @@ public class PatrolEnemy : MonoBehaviour
         else if (isPatrolling)
         {
             moveSpeed = 0.5f;
-            Debug.Log("Patrolling!");
+            //Debug.Log("Patrolling!");
             transform.Translate(Vector2.left * (Time.deltaTime * moveSpeed));
 
             var hit = Physics2D.Raycast(checkPoint.position, Vector2.down, distance, layerMask);
@@ -99,6 +103,20 @@ public class PatrolEnemy : MonoBehaviour
         else
             animator.SetBool("isRunning", false);
     }
+    
+    public void Attack()
+    {
+        var collInfo = Physics2D.OverlapCircle(attackPoint.position, attackRadius, attackLayer);
+
+        if (collInfo)
+        {
+            Debug.Log($"{collInfo.transform.name} has been attacked");
+            if (collInfo.gameObject.GetComponent<Player>() != null)
+            {
+                collInfo.gameObject.GetComponent<Player>().TakeDamage(10);
+            }
+        }
+    }
 
     private void OnDrawGizmosSelected()
     {
@@ -116,19 +134,24 @@ public class PatrolEnemy : MonoBehaviour
             Gizmos.DrawRay(checkPoint.position, Vector2.left * 0.1f);
         else
             Gizmos.DrawRay(checkPoint.position, Vector2.right * 0.1f);
+
+        
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPoint.position, attackRadius);
     }
 
     private void Flip()
     {
         if (facingLeft)
         {
-            Debug.Log("Flip Enemy");
+            //Debug.Log("Flip Enemy");
             transform.eulerAngles = new Vector3(0, -180, 0);
             facingLeft = !facingLeft;
         }
         else
         {
-            Debug.Log("Flip Enemy");
+            //Debug.Log("Flip Enemy");
             transform.eulerAngles = new Vector3(0, 0, 0);
             facingLeft = !facingLeft;
         }

@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -13,7 +14,8 @@ public class Player : MonoBehaviour
     private bool _jumpRequested;
     public LayerMask groundLayer;
     public float checkGroundDistance = 0.35f;
-    
+    public int maxHealth = 100;
+    public Text healthText;
 
     void Start()
     {
@@ -21,6 +23,13 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+        healthText.text = "Health:" + maxHealth.ToString();
+        
+        if (maxHealth <= 0)
+        {
+            Die();
+        }
+        
         _movement = Input.GetAxis("Horizontal");
 
         if (_movement < 0f && _facingRight)
@@ -84,5 +93,18 @@ public class Player : MonoBehaviour
     private void OnDrawGizmosSelected()
     {
         Debug.DrawRay(transform.position, Vector2.down * checkGroundDistance, Color.yellow); 
+    }
+
+    public void TakeDamage(int damage)
+    {
+        if (maxHealth <= 0)
+            return;
+        maxHealth -= damage;
+        Debug.Log($"Player takes damage {damage}");
+    }
+
+    void Die()
+    {
+        Debug.Log("Player Died.");
     }
 }
